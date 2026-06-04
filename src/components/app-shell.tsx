@@ -114,15 +114,10 @@ function SidebarContent({
 
   return (
     <div className="flex flex-col w-full h-full">
-      <div className="px-5 py-5 border-b flex items-center gap-2">
-        <div className="h-9 w-9 rounded-lg bg-gradient-primary grid place-items-center text-primary-foreground shadow-glow">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div>
-          <div className="font-semibold leading-tight">Expert Solutions</div>
-          <div className="text-xs text-muted-foreground">Earn. Verify. Withdraw.</div>
-        </div>
+      <div className="px-5 py-5 border-b">
+        <BrandLogo size="md" showTagline />
       </div>
+
 
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
         {NAV.map((item) => {
