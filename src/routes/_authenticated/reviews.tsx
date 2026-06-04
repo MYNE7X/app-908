@@ -127,6 +127,7 @@ function ReviewsPage() {
         created_at: r.created_at,
         status: r.status,
         isMine: uid === r.reviewer_id,
+        avatarUrl: p?.avatar_url ?? null,
       };
     });
     const b: Item[] = (fakes ?? []).map((f: any) => ({
@@ -137,6 +138,7 @@ function ReviewsPage() {
       content: f.content,
       created_at: f.created_at,
       status: "approved",
+      avatarUrl: null,
     }));
     return [...a, ...b];
   }, [real, fakes, profilesById]);
