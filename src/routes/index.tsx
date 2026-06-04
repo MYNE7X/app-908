@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Video, Wallet, ShieldCheck } from "lucide-react";
+import { Video, Wallet, ShieldCheck } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,9 +19,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground">
       <header className="px-6 sm:px-10 py-6 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 font-semibold text-lg">
-          <Sparkles className="h-6 w-6" /> Expert Solutions
-        </div>
+        <BrandLogo size="lg" variant="onPrimary" />
         <div className="flex gap-2">
           <Button asChild variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
             <Link to="/auth">Sign in</Link>
