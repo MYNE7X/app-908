@@ -1,0 +1,25 @@
+{
+  "name": "Expert Solutions",
+  "short_name": "Expert",
+  "description": "Earn rewards by completing verified tasks.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "icons": [
+    {
+      "src": "/__l5e/assets-v1/6c0b3f5a-45d4-42bb-a769-fd6f442d0d2e/expert-solutions-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/__l5e/assets-v1/6c0b3f5a-45d4-42bb-a769-fd6f442d0d2e/expert-solutions-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
