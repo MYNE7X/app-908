@@ -232,10 +232,19 @@ function ReviewsPage() {
           <Card key={r.id} className="glass overflow-hidden">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold text-primary-foreground shrink-0"
-                     style={{ background: "linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary)/0.6))" }}>
-                  {initials(r.name)}
-                </div>
+              {(() => {
+                const [c1, c2] = gradientFor(r.name);
+                return (
+                  <div className="h-11 w-11 rounded-full shrink-0 ring-2 ring-background shadow-md overflow-hidden flex items-center justify-center text-sm font-bold text-white"
+                       style={{ background: `linear-gradient(135deg, ${c1}, ${c2})` }}>
+                    {r.avatarUrl ? (
+                      <img src={r.avatarUrl} alt={r.name} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                    ) : (
+                      <span className="drop-shadow-sm">{initials(r.name)}</span>
+                    )}
+                  </div>
+                );
+              })()}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
                     <div className="min-w-0">
