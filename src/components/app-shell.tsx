@@ -76,9 +76,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SidebarContent ctx={ctx} onSignOut={signOut} />
           </SheetContent>
         </Sheet>
-        <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-          <Sparkles className="h-5 w-5 text-primary" />
-          Expert Solutions
+        <Link to="/dashboard" aria-label="Home">
+          <BrandLogo size="sm" />
         </Link>
         <Link to="/profile" aria-label="Profile">
           <Avatar className="h-8 w-8">
