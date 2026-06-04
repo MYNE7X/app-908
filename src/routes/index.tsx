@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Video, ShieldCheck, Wallet, ArrowRight, Star, Users, Zap } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
+import { LogoIcon } from "@/components/logo-icon";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -12,14 +13,17 @@ function Index() {
     <div className="min-h-screen bg-gradient-hero text-primary-foreground overflow-x-hidden">
       {/* ── Header ─────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-gradient-hero/80 backdrop-blur-md border-b border-white/10">
-        <div className="px-4 sm:px-8 py-3 flex items-center justify-between gap-3 max-w-7xl mx-auto">
-          <BrandLogo size="sm" variant="onPrimary" showWordmark />
-          <div className="flex items-center gap-2">
+        <div className="px-4 sm:px-8 py-3 flex items-center justify-between gap-2 max-w-7xl mx-auto">
+          {/* Mobile: icon only — desktop: full logo with wordmark */}
+          <LogoIcon className="h-9 w-9 sm:hidden shrink-0" />
+          <BrandLogo size="sm" variant="onPrimary" showWordmark className="hidden sm:flex" />
+
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               asChild
               variant="ghost"
               size="sm"
-              className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
+              className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground px-3"
             >
               <Link to="/auth">Sign in</Link>
             </Button>
