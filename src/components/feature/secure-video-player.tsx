@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Play, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Youtube } from "lucide-react";
 
 interface Props {
   src: string;
@@ -9,52 +8,135 @@ interface Props {
   onComplete?: () => void;
 }
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: any;
+    __ytApiLoading?: boolean;
+    __ytApiReady?: boolean;
+    __ytApiQueue?: Array<() => void>;
+  }
+}
+
+function loadYouTubeApi(): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve();
+    if (window.__ytApiReady && window.YT?.Player) return resolve();
+    window.__ytApiQueue = window.__ytApiQueue ?? [];
+    window.__ytApiQueue.push(resolve);
+    if (window.__ytApiLoading) return;
+    window.__ytApiLoading = true;
+    const prev = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      window.__ytApiReady = true;
+      (window.__ytApiQueue ?? []).forEach((cb) => cb());
+      window.__ytApiQueue = [];
+      if (typeof prev === "function") prev();
+    };
+    const s = document.createElement("script");
+    s.src = "https://www.youtube.com/iframe_api";
+    s.async = true;
+    document.head.appendChild(s);
+  });
+}
+
+function extractYouTubeId(url: string): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtu.be")) return u.pathname.replace(/^\//, "").split(/[?&#]/)[0] || null;
+    if (u.hostname.includes("youtube.com")) {
+      if (u.pathname === "/watch") return u.searchParams.get("v");
+      const m = u.pathname.match(/^\/(?:embed|shorts|v)\/([^/?#]+)/);
+      if (m) return m[1];
+    }
+  } catch {
+    const m = url.match(/[?&]v=([^&#]+)/);
+    if (m) return m[1];
+  }
+  return null;
+}
+
 export function SecureVideoPlayer({ src, minWatchSeconds = 0, onComplete }: Props) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const lastTimeRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
   const watchedRef = useRef(0);
-  const [playing, setPlaying] = useState(false);
+  const tickRef = useRef<number | null>(null);
   const [watched, setWatched] = useState(0);
   const [duration, setDuration] = useState(0);
   const [completed, setCompleted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const videoId = extractYouTubeId(src);
 
   useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    const onTime = () => {
-      const t = v.currentTime;
-      const delta = t - lastTimeRef.current;
-      if (delta > 0 && delta < 1.5) {
-        watchedRef.current += delta;
-        setWatched(watchedRef.current);
-      } else if (delta >= 1.5) {
-        // anti-skip — rewind
-        v.currentTime = lastTimeRef.current;
-      }
-      lastTimeRef.current = v.currentTime;
-    };
-    const onSeek = () => {
-      if (v.currentTime > lastTimeRef.current + 0.5) v.currentTime = lastTimeRef.current;
-    };
-    const onMeta = () => setDuration(v.duration || 0);
-    const onEnd = () => setPlaying(false);
-    v.addEventListener("timeupdate", onTime);
-    v.addEventListener("seeking", onSeek);
-    v.addEventListener("loadedmetadata", onMeta);
-    v.addEventListener("ended", onEnd);
+    if (!videoId || !containerRef.current) {
+      if (!videoId) setError("Invalid YouTube link");
+      return;
+    }
+    let destroyed = false;
+
+    loadYouTubeApi().then(() => {
+      if (destroyed || !containerRef.current) return;
+      const node = document.createElement("div");
+      containerRef.current.innerHTML = "";
+      containerRef.current.appendChild(node);
+
+      playerRef.current = new window.YT.Player(node, {
+        videoId,
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          // hide controls, skip/forward, related videos, keyboard skip, etc.
+          controls: 0,
+          disablekb: 1,
+          modestbranding: 1,
+          rel: 0,
+          fs: 0,
+          iv_load_policy: 3,
+          playsinline: 1,
+          showinfo: 0,
+        },
+        events: {
+          onReady: (e: any) => {
+            try {
+              setDuration(e.target.getDuration() || 0);
+            } catch {}
+          },
+          onStateChange: (e: any) => {
+            // 1 = playing
+            if (e.data === 1) {
+              if (tickRef.current) window.clearInterval(tickRef.current);
+              tickRef.current = window.setInterval(() => {
+                watchedRef.current += 1;
+                setWatched(watchedRef.current);
+              }, 1000);
+            } else {
+              if (tickRef.current) {
+                window.clearInterval(tickRef.current);
+                tickRef.current = null;
+              }
+            }
+          },
+        },
+      });
+    });
+
     return () => {
-      v.removeEventListener("timeupdate", onTime);
-      v.removeEventListener("seeking", onSeek);
-      v.removeEventListener("loadedmetadata", onMeta);
-      v.removeEventListener("ended", onEnd);
+      destroyed = true;
+      if (tickRef.current) window.clearInterval(tickRef.current);
+      try {
+        playerRef.current?.destroy?.();
+      } catch {}
     };
-  }, []);
+  }, [videoId]);
 
   useEffect(() => {
-    if (!completed && minWatchSeconds > 0 && watched >= minWatchSeconds) {
+    if (completed) return;
+    if (minWatchSeconds > 0 && watched >= minWatchSeconds) {
       setCompleted(true);
       onComplete?.();
-    } else if (!completed && minWatchSeconds === 0 && duration > 0 && watched >= duration * 0.9) {
+    } else if (minWatchSeconds === 0 && duration > 0 && watched >= duration * 0.9) {
       setCompleted(true);
       onComplete?.();
     }
@@ -65,27 +147,15 @@ export function SecureVideoPlayer({ src, minWatchSeconds = 0, onComplete }: Prop
 
   return (
     <div className="space-y-3">
-      <div className="relative aspect-video rounded-lg overflow-hidden bg-black">
-        <video
-          ref={ref}
-          src={src}
-          className="w-full h-full"
-          playsInline
-          controlsList="nodownload noremoteplayback noplaybackrate"
-          disablePictureInPicture
-          onContextMenu={(e) => e.preventDefault()}
-          onPlay={() => setPlaying(true)}
-          onPause={() => setPlaying(false)}
-        />
-        {!playing && (
-          <button
-            type="button"
-            onClick={() => ref.current?.play()}
-            className="absolute inset-0 grid place-items-center bg-black/40 text-white hover:bg-black/50 transition"
-            aria-label="Play"
-          >
-            <Play className="h-14 w-14" />
-          </button>
+      <div className="relative aspect-video rounded-xl overflow-hidden bg-black shadow-elegant ring-1 ring-border">
+        <div ref={containerRef} className="absolute inset-0" />
+        {/* Block click-through to YouTube controls / title overlay */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-black/70 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/70 to-transparent" />
+        {error && (
+          <div className="absolute inset-0 grid place-items-center text-white text-sm bg-black/80">
+            <div className="flex items-center gap-2"><Youtube className="h-5 w-5 text-red-500" /> {error}</div>
+          </div>
         )}
       </div>
       <div className="space-y-1">
