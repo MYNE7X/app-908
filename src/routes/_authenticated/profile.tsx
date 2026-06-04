@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FileUpload } from "@/components/feature/file-upload";
 import { toast } from "sonner";
 import { Loader2, Lock, ShieldCheck, Camera, MapPin, Mail, Phone, User as UserIcon, Globe, CalendarClock } from "lucide-react";
 
