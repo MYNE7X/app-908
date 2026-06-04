@@ -36,7 +36,7 @@ export function BrandLogo({
           src={logoAsset.url}
           alt="Expert Solutions"
           className={cn(
-            "relative w-auto object-contain drop-shadow-[0_0_18px_rgba(56,189,248,0.45)] select-none",
+            "relative w-auto object-contain rounded-2xl drop-shadow-[0_0_18px_rgba(56,189,248,0.45)] select-none ring-1 ring-white/10",
             s.img,
           )}
           draggable={false}

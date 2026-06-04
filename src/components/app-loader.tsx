@@ -9,7 +9,7 @@ export function AppLoader({ label = "Loading…" }: { label?: string }) {
           <img
             src={logoAsset.url}
             alt="Expert Solutions"
-            className="relative h-24 w-auto object-contain drop-shadow-[0_0_28px_rgba(56,189,248,0.55)] animate-[pulse_2s_ease-in-out_infinite]"
+            className="relative h-24 w-auto object-contain rounded-3xl ring-1 ring-white/10 drop-shadow-[0_0_28px_rgba(56,189,248,0.55)] animate-[pulse_2s_ease-in-out_infinite]"
           />
         </div>
         <div className="flex items-center gap-2">
