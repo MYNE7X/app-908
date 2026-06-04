@@ -74,6 +74,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     navigate({ to: "/auth", replace: true });
   }
 
+  if (!authReady) return <AppLoader label="Preparing your workspace…" />;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="lg:hidden sticky top-0 z-40 flex items-center justify-between gap-2 px-4 h-14 border-b bg-background/80 backdrop-blur">

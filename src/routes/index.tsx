@@ -19,7 +19,7 @@ function Index() {
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground">
       <header className="px-6 sm:px-10 py-6 flex items-center justify-between max-w-7xl mx-auto">
-        <BrandLogo size="lg" variant="onPrimary" />
+        <BrandLogo size="lg" variant="onPrimary" showWordmark showTagline />
         <div className="flex gap-2">
           <Button asChild variant="ghost" className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
             <Link to="/auth">Sign in</Link>
