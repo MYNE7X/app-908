@@ -93,7 +93,7 @@ function ReviewsPage() {
     queryFn: async () => {
       const ids = Array.from(new Set((real?.rows ?? []).map((r: any) => r.reviewer_id))).filter(Boolean);
       if (!ids.length) return {} as Record<string, any>;
-      const { data } = await supabase.from("profiles").select("id, full_name, username, city, country").in("id", ids);
+      const { data } = await supabase.from("profiles").select("id, full_name, username, city, country, avatar_url").in("id", ids);
       const m: Record<string, any> = {};
       (data ?? []).forEach((p: any) => (m[p.id] = p));
       return m;
