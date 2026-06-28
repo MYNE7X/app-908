@@ -15,45 +15,45 @@ const FAQS = [
     items: [
       {
         q: "What is Expert Solutions?",
-        a: "Expert Solutions is a Pakistan-based online earning platform. Members complete simple daily tasks — watching videos, writing assignments, or entering data — and receive PKR earnings directly to their OPay wallet or Mashreq Bank account.",
+        a: "Expert Solutions is an online earning platform for Pakistan. You do simple daily tasks — like watching short videos or writing content — and get paid in PKR directly to your mobile wallet or bank account.",
       },
       {
-        q: "Who can join?",
-        a: "Anyone 18 or older can join — Pakistani residents and international members alike. We have active members in the UAE, UK, USA, Saudi Arabia, Canada, Germany, Qatar, and many more countries. All tasks are completed fully online.",
+        q: "Do I need any skills or experience?",
+        a: "No skills required. If you can watch a video or type a few sentences, you can earn. Our tasks are designed to be simple and easy for anyone to complete.",
       },
       {
-        q: "Is this platform legitimate?",
-        a: "Yes. Expert Solutions has been operating since 2023 with over 2,400 active members. Every withdrawal is processed manually by our admin team. We have official payment partnerships with OPay and Mashreq Bank.",
+        q: "Is Expert Solutions real or a scam?",
+        a: "Expert Solutions is 100% real. We have been paying members since 2023 and have over 2,400 active users across Pakistan. Payments are sent directly to OPay and Mashreq Bank — you can withdraw whenever you like.",
       },
       {
-        q: "How do I sign up?",
-        a: "Click 'Get started', enter your email and a password, complete your profile, then choose a package. The whole process takes under 5 minutes.",
+        q: "How do I create an account?",
+        a: "Tap 'Get started', enter your email and a password, fill in your name and phone number, then pick a package that suits you. It takes about 2–3 minutes.",
+      },
+      {
+        q: "Can people from other countries join?",
+        a: "Yes! We have members from the UAE, UK, Saudi Arabia, USA, Canada, and many more countries. All tasks are done online so you can work from anywhere in the world.",
       },
     ],
   },
   {
-    category: "Packages & Payments",
+    category: "Packages & Fees",
     color: "from-emerald-600 to-emerald-900",
     items: [
       {
-        q: "What packages are available?",
-        a: "We offer three packages: Starter (₨799, earn ₨80/day via video tasks), Professional (₨1,299, earn ₨250/day via assignment writing), and Premium (₨4,500, earn ₨400/day via video + data entry). The joining fee is a one-time payment.",
+        q: "How much does it cost to join?",
+        a: "We have three options: Starter for ₨799, Professional for ₨1,299, and Premium for ₨4,500. This is a one-time joining fee — you pay once and earn every day after that.",
       },
       {
-        q: "How do I pay to join?",
-        a: "You can pay via OPay (mobile wallet), Mashreq Bank transfer, or direct bank transfer. After payment, send your transaction screenshot to our admin team, who will approve your account and email you an activation key.",
+        q: "How do I pay the joining fee?",
+        a: "You can pay using OPay or Mashreq Bank. Just send the amount to our payment number, take a screenshot, and submit it. Our team will activate your account usually within a few hours.",
       },
       {
-        q: "Can I upgrade my package later?",
-        a: "Yes. You can upgrade from Starter to Professional or Premium at any time. Pay the difference amount and submit proof to the admin panel. Upgrades are typically approved within a few hours.",
+        q: "Are there any extra charges or hidden fees?",
+        a: "No. The joining fee is the only payment you make to us. Withdrawals are completely free on our side.",
       },
       {
-        q: "What if my payment is rejected?",
-        a: "If your payment screenshot is rejected, the admin team will provide a reason. Common reasons include unclear screenshots, incorrect amounts, or unrecognised sender accounts. Contact support and we'll help resolve it.",
-      },
-      {
-        q: "Are there any hidden fees?",
-        a: "No hidden fees at all. The package price is a one-time joining fee. Withdrawals are free. OPay and Mashreq Bank may apply their own standard transfer charges on their end.",
+        q: "Can I switch to a bigger package later?",
+        a: "Yes, you can upgrade at any time. Just pay the difference and let our team know. Your earnings will increase from the next working day.",
       },
     ],
   },
@@ -62,20 +62,20 @@ const FAQS = [
     color: "from-amber-500 to-orange-700",
     items: [
       {
-        q: "How do I complete tasks?",
-        a: "After activation, go to the Tasks or Video Tasks page in your dashboard. Watch assigned videos until completion, or submit written assignments with a screenshot proof. Completed tasks are reviewed by admins within 24 hours.",
+        q: "How do I start earning?",
+        a: "Once your account is activated, open your dashboard and go to Tasks. Complete the tasks shown for that day and your earnings will be added to your wallet automatically.",
       },
       {
-        q: "How many tasks can I do per day?",
-        a: "Starter members watch 5–10 videos per day. Professional members complete 1–3 writing tasks per day. Premium members do a combination of video and data entry tasks. Tasks reset at midnight PKR time.",
+        q: "How much can I earn per day?",
+        a: "It depends on your package. Starter members earn ₨80 per day, Professional members earn ₨250 per day, and Premium members earn ₨400 per day.",
       },
       {
-        q: "What happens if I miss a day?",
-        a: "Missing a day simply means no earnings for that day. There is no penalty, ban, or expiry — your account and package remain fully active. Just resume tasks the next day.",
+        q: "What kind of tasks are there?",
+        a: "Most tasks involve watching short videos, writing short paragraphs, or entering basic information. All tasks are straightforward with clear instructions — no guesswork.",
       },
       {
-        q: "Can I earn more than the daily limit?",
-        a: "Daily limits are fixed per package to ensure fair distribution of tasks. You can earn more by upgrading to a higher package. Referral bonuses (when available) are separate from daily task earnings.",
+        q: "What if I can't do tasks one day?",
+        a: "That is completely fine. You only earn on the days you complete tasks. Your account stays open and you can continue the next day without any problem.",
       },
     ],
   },
@@ -84,42 +84,42 @@ const FAQS = [
     color: "from-cyan-600 to-cyan-900",
     items: [
       {
-        q: "When can I withdraw my earnings?",
-        a: "You can request a withdrawal as soon as your wallet balance meets the minimum threshold (₨500 for OPay, ₨1,000 for Mashreq Bank). Withdrawals are processed within 1–6 hours on business days (Mon–Sat, 9am–9pm PKR).",
+        q: "When can I take out my money?",
+        a: "You can request a withdrawal as soon as you have enough balance — ₨500 minimum for OPay and ₨1,000 for Mashreq Bank. Most requests are completed the same day.",
       },
       {
-        q: "Which withdrawal methods are supported?",
-        a: "We support OPay (mobile wallet — fastest, usually under 60 seconds after approval), Mashreq Bank (direct account transfer — ideal for larger amounts), and general bank transfer for international members.",
+        q: "How long does a withdrawal take?",
+        a: "OPay transfers usually arrive within minutes. Mashreq Bank transfers are completed the same day. Our team processes requests between 9am and 9pm Pakistan time.",
       },
       {
-        q: "How do I request a withdrawal?",
-        a: "Go to your Wallet page, tap 'Withdraw', enter your OPay number or Mashreq Bank account details, and confirm. The admin team receives the request and processes it manually.",
+        q: "Which payment methods are available?",
+        a: "We currently support OPay mobile wallet and Mashreq Bank account transfers. OPay is faster and recommended for smaller amounts.",
       },
       {
-        q: "I'm outside Pakistan — how do I withdraw?",
-        a: "International members can request withdrawal to any Pakistani bank account or mobile wallet they have access to (e.g., a family member's OPay account). We do not currently support direct international SWIFT withdrawals.",
+        q: "I live outside Pakistan — can I still withdraw?",
+        a: "Yes. You can withdraw to any Pakistani OPay or bank account — for example, a family member's account back home. Just provide the details when you request a withdrawal.",
       },
     ],
   },
   {
-    category: "Account & Security",
+    category: "Account Help",
     color: "from-rose-600 to-rose-900",
     items: [
       {
-        q: "Is my personal information safe?",
-        a: "Yes. We use Supabase with Row Level Security — meaning your data is only accessible to you and authorised admin staff. We never sell or share your information with third parties.",
+        q: "Is my information kept private?",
+        a: "Yes, your personal details are kept completely private. We do not share or sell your information to anyone. Only our trusted team can access account details when needed for support.",
       },
       {
-        q: "Can I have multiple accounts?",
-        a: "No. Each person is allowed one account only. Multiple accounts from the same device or IP are automatically flagged and may result in suspension of all related accounts.",
+        q: "I forgot my password — what do I do?",
+        a: "Go to the sign-in page and tap 'Forgot password'. Enter your email and we will send you a link to reset it. Check your spam folder if you don't see it within a few minutes.",
       },
       {
-        q: "What if I forget my password?",
-        a: "Use the 'Forgot password' link on the sign-in page. An email reset link will be sent to your registered email address. If you don't receive it within 5 minutes, check your spam folder or contact support.",
+        q: "Can I have more than one account?",
+        a: "No, one account per person only. Having multiple accounts is against our rules and can result in your accounts being closed.",
       },
       {
         q: "How do I contact support?",
-        a: "Use the in-app support section or reach us via WhatsApp (number listed in the app after login). Our support team is available Saturday–Thursday, 9am–10pm PKR.",
+        a: "You can reach our support team via WhatsApp. The contact number is available inside your account after you log in. We are available Saturday to Thursday, 9am to 10pm Pakistan time.",
       },
     ],
   },

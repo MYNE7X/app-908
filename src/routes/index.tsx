@@ -70,10 +70,10 @@ const REVIEWS = [
 ];
 
 const FAQS_PREVIEW = [
-  { q: "Is Expert Solutions legitimate?", a: "Yes — we have 2,400+ active members and official payment partnerships with OPay and Mashreq Bank. Every withdrawal is processed manually by our admin team." },
-  { q: "How quickly are withdrawals processed?", a: "OPay withdrawals are usually completed in under 60 seconds after admin approval. Mashreq Bank transfers settle the same day. Admins process requests within 1–6 hours on business days." },
-  { q: "Can members outside Pakistan join?", a: "Absolutely. We have members from the UAE, UK, USA, Saudi Arabia, Canada, and many more countries. All tasks are 100% online — work from anywhere." },
-  { q: "What is the minimum withdrawal amount?", a: "₨500 for OPay and ₨1,000 for Mashreq Bank. There are no withdrawal fees charged by us." },
+  { q: "Is Expert Solutions real or a scam?", a: "100% real. We have been paying members since 2023. Over 2,400 people across Pakistan earn daily and withdraw directly to OPay or Mashreq Bank." },
+  { q: "Do I need any experience to join?", a: "No experience needed at all. If you can watch a short video or type a few sentences, you can do the tasks and earn every day." },
+  { q: "How long does it take to receive my withdrawal?", a: "OPay transfers usually arrive within minutes. Mashreq Bank is the same day. Our team handles requests between 9am and 9pm Pakistan time." },
+  { q: "Can I join from outside Pakistan?", a: "Yes. Members from the UAE, UK, Saudi Arabia, USA, Canada and many other countries are already earning with us. All tasks are done fully online." },
 ];
 
 function FaqItem({ q, a }: { q: string; a: string }) {
