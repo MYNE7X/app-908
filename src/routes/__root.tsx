@@ -36,7 +36,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn&apos;t load</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong. You can try refreshing or head back home.
+          Something went wrong. Try again or sign in again.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -49,10 +49,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             Try again
           </button>
           <a
+            href="/auth"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          >
+            Sign in
+          </a>
+          <a
             href="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
-            Go home
+            Home
           </a>
         </div>
       </div>
