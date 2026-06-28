@@ -205,9 +205,10 @@ const CARD_THEMES = [
 ];
 
 function PackageCard({ pkg }: { pkg: any }) {
-  const idx = (pkg.sort_order ?? 1) - 1;
-  const theme = CARD_THEMES[idx % CARD_THEMES.length];
-  const daily = Number(pkg.daily_earning ?? 0);
+  const rawIdx = Number(pkg.sort_order ?? 1) - 1;
+  const idx = ((rawIdx % CARD_THEMES.length) + CARD_THEMES.length) % CARD_THEMES.length;
+  const theme = CARD_THEMES[idx] ?? CARD_THEMES[0];
+  const daily = Number(pkg.daily_earning ?? pkg.daily ?? 0);
   const features = parseFeatures(pkg.features);
   const price = Number(pkg.price);
 
@@ -290,6 +291,7 @@ function PackageDetailDialog({
               {pkg.tagline || "Earning Plan"}
             </div>
             <DialogTitle className="text-2xl font-black text-white">{pkg.name}</DialogTitle>
+            <DialogDescription className="sr-only">{pkg.description || `${pkg.name} earning package details and purchase form`}</DialogDescription>
             <div className="mt-3 flex items-end gap-4">
               <div>
                 <div className="text-4xl font-black tracking-tight">{pkr(Number(pkg.price))}</div>

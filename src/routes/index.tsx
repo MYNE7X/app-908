@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Video, ShieldCheck, Wallet, ArrowRight, Star, Users, Zap,
@@ -7,6 +8,7 @@ import {
 } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { LogoIcon } from "@/components/logo-icon";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -20,20 +22,22 @@ const PACKAGES = [
     daily: "₨80",
     weekly: "₨560",
     monthly: "₨2,400",
-    color: "from-emerald-500/20 to-emerald-500/5",
-    border: "border-emerald-500/20",
+    from: "from-emerald-600",
+    to: "to-emerald-900",
+    accent: "text-emerald-300",
     icon: Video,
-    features: ["Watch 5–10 videos/day", "Daily earning ₨80", "JazzCash / OPay withdrawal"],
+    features: ["Watch 5–10 videos/day", "Daily earning ₨80", "OPay / Mashreq withdrawal"],
   },
   {
     name: "Professional",
     price: "₨1,299",
-    tagline: "Assignment Work",
+    tagline: "Assignment Writing",
     daily: "₨250",
     weekly: "₨1,750",
     monthly: "₨7,500",
-    color: "from-primary/20 to-primary/5",
-    border: "border-primary/30",
+    from: "from-violet-600",
+    to: "to-violet-900",
+    accent: "text-violet-300",
     icon: BookOpen,
     badge: "Most Popular",
     features: ["Essay & assignment writing", "Daily earning ₨250", "Priority tasks"],
@@ -45,16 +49,27 @@ const PACKAGES = [
     daily: "₨400",
     weekly: "₨2,800",
     monthly: "₨12,000",
-    color: "from-amber-500/20 to-amber-500/5",
-    border: "border-amber-500/20",
+    from: "from-amber-500",
+    to: "to-orange-700",
+    accent: "text-yellow-300",
     icon: Database,
     features: ["Videos + data entry tasks", "Daily earning ₨400", "VIP support"],
   },
 ];
 
 function Index() {
+  const navigate = useNavigate();
+
+  /* ── If already logged in → go straight to dashboard ── */
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) navigate({ to: "/dashboard", replace: true });
+    });
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-gradient-hero text-primary-foreground overflow-x-hidden">
+
       {/* ── Header ─────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-gradient-hero/80 backdrop-blur-md border-b border-white/10">
         <div className="px-4 sm:px-8 py-3 flex items-center justify-between gap-2 max-w-7xl mx-auto">
@@ -72,6 +87,7 @@ function Index() {
       </header>
 
       <main className="px-4 sm:px-8 max-w-7xl mx-auto">
+
         {/* ── Hero ───────────────────────────────── */}
         <section className="pt-12 pb-10 sm:pt-20 sm:pb-16 text-center sm:text-left">
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur border border-white/20 px-3 py-1.5 text-xs font-medium mb-6">
@@ -103,12 +119,11 @@ function Index() {
             </Button>
           </div>
 
-          {/* Social proof */}
           <div className="mt-8 flex items-center gap-4 justify-center sm:justify-start text-sm opacity-80">
             <div className="flex -space-x-2">
-              {["#10b981", "#6366f1", "#f59e0b", "#ec4899"].map((c, i) => (
+              {["#10b981","#6366f1","#f59e0b","#ec4899"].map((c, i) => (
                 <div key={i} className="h-7 w-7 rounded-full border-2 border-white/30 grid place-items-center text-[10px] font-bold text-white" style={{ background: c }}>
-                  {["A", "B", "C", "D"][i]}
+                  {["A","B","C","D"][i]}
                 </div>
               ))}
             </div>
@@ -116,7 +131,7 @@ function Index() {
           </div>
         </section>
 
-        {/* ── Stats bar ───────────────────────────── */}
+        {/* ── Stats ─────────────────────────── */}
         <section className="grid grid-cols-3 gap-3 pb-10 border-t border-white/10 pt-8">
           {[
             { icon: Users, value: "2,400+", label: "Active members" },
@@ -137,8 +152,8 @@ function Index() {
           <div className="grid sm:grid-cols-3 gap-4">
             {[
               { step: "1", icon: Award, title: "Create & Verify", desc: "Sign up, complete your profile, and get your account verified instantly." },
-              { step: "2", icon: Key, title: "Choose a Package", desc: "Pick Starter (₨799), Professional (₨1,299), or Premium (₨4,500) — pay via OPay, JazzCash, or bank." },
-              { step: "3", icon: Wallet, title: "Earn & Withdraw", desc: "Complete daily tasks, earn PKR, and withdraw directly to your JazzCash / Easypaisa / bank account." },
+              { step: "2", icon: Key, title: "Choose a Package", desc: "Pick Starter (₨799), Professional (₨1,299), or Premium (₨4,500) — pay via OPay or Mashreq Bank." },
+              { step: "3", icon: Wallet, title: "Earn & Withdraw", desc: "Complete daily tasks, earn PKR, and withdraw directly to OPay or Mashreq Bank." },
             ].map((s) => (
               <div key={s.step} className="glass rounded-2xl p-5 border border-white/10 hover:border-white/25 transition-all">
                 <div className="flex items-center gap-3 mb-3">
@@ -152,7 +167,7 @@ function Index() {
           </div>
         </section>
 
-        {/* ── Packages preview ─────────────────── */}
+        {/* ── Packages ──────────────────────── */}
         <section className="pb-12">
           <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2">Earning Packages</h2>
           <p className="text-center opacity-70 text-sm mb-8">All prices in PKR — one-time joining fee</p>
@@ -162,51 +177,53 @@ function Index() {
               return (
                 <div
                   key={p.name}
-                  className={`glass rounded-2xl p-5 bg-gradient-to-br ${p.color} border ${p.border} relative hover:scale-[1.02] transition-all duration-200`}
+                  className={`relative rounded-3xl overflow-hidden bg-gradient-to-br ${p.from} ${p.to} text-white shadow-xl group hover:scale-[1.02] transition-all duration-200`}
                 >
                   {p.badge && (
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2">
-                      <span className="bg-white text-primary text-[10px] font-bold px-3 py-0.5 rounded-full shadow-md">
+                    <div className="absolute top-3 right-3">
+                      <span className="bg-white/20 backdrop-blur text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide uppercase border border-white/30">
                         {p.badge}
                       </span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-9 w-9 rounded-xl bg-white/15 grid place-items-center">
-                      <Icon className="h-4.5 w-4.5 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-bold">{p.name}</div>
-                      <div className="text-[11px] opacity-70">{p.tagline}</div>
-                    </div>
-                  </div>
-                  <div className="text-2xl font-extrabold mb-3">{p.price}</div>
+                  <div className="absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/10 blur-xl" />
+                  <div className="absolute -bottom-12 -left-8 h-40 w-40 rounded-full bg-black/20 blur-xl" />
 
-                  <div className="grid grid-cols-3 gap-1 rounded-xl bg-white/10 p-2.5 mb-4 text-center">
-                    <div>
-                      <TrendingUp className="h-3 w-3 mx-auto mb-0.5 opacity-70" />
-                      <div className="text-[9px] opacity-60 uppercase">Daily</div>
-                      <div className="text-xs font-bold">{p.daily}</div>
+                  <div className="relative p-5 flex flex-col min-h-[230px]">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className={`text-xs font-bold uppercase tracking-widest ${p.accent} mb-1`}>{p.tagline}</div>
+                        <h3 className="text-xl font-extrabold">{p.name}</h3>
+                      </div>
+                      <div className="h-9 w-9 rounded-xl bg-white/15 grid place-items-center shrink-0">
+                        <Icon className="h-4.5 w-4.5 text-white" />
+                      </div>
                     </div>
-                    <div>
-                      <CalendarDays className="h-3 w-3 mx-auto mb-0.5 opacity-70" />
-                      <div className="text-[9px] opacity-60 uppercase">Weekly</div>
-                      <div className="text-xs font-bold">{p.weekly}</div>
-                    </div>
-                    <div>
-                      <Calendar className="h-3 w-3 mx-auto mb-0.5 opacity-70" />
-                      <div className="text-[9px] opacity-60 uppercase">Monthly</div>
-                      <div className="text-xs font-bold">{p.monthly}</div>
-                    </div>
-                  </div>
 
-                  <ul className="space-y-1 mb-4">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-xs opacity-90">
-                        <Check className="h-3.5 w-3.5 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
+                    <div className="mt-3 text-3xl font-black">{p.price}</div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-1 rounded-xl bg-black/20 p-2.5 text-center">
+                      {[
+                        { icon: TrendingUp, label: "Daily", val: p.daily },
+                        { icon: CalendarDays, label: "Weekly", val: p.weekly },
+                        { icon: Calendar, label: "Monthly", val: p.monthly },
+                      ].map((e) => (
+                        <div key={e.label}>
+                          <e.icon className="h-3 w-3 mx-auto mb-0.5 opacity-70" />
+                          <div className="text-[9px] opacity-60 uppercase">{e.label}</div>
+                          <div className="text-xs font-bold">{e.val}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <ul className="mt-3 space-y-1 flex-1">
+                      {p.features.map((f) => (
+                        <li key={f} className="flex items-center gap-1.5 text-xs opacity-90">
+                          <Check className="h-3.5 w-3.5 shrink-0" /> {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               );
             })}
@@ -223,16 +240,19 @@ function Index() {
         {/* ── Features ──────────────────────────── */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-12 border-t border-white/10 pt-10">
           {[
-            { icon: Video, title: "Secure Video Tasks", desc: "Tamper-proof player with automatic watch tracking. Complete videos to unlock daily earnings.", accent: "from-cyan-500/20 to-cyan-500/5" },
-            { icon: ShieldCheck, title: "Verified Submissions", desc: "Upload screenshot proof reviewed by admins. Transparent, fair, and fast approval process.", accent: "from-primary/20 to-primary/5" },
-            { icon: Wallet, title: "Fast PKR Withdrawals", desc: "Instant withdrawals to JazzCash, Easypaisa, OPay, Mashreq Bank, or any bank account.", accent: "from-emerald-500/20 to-emerald-500/5" },
+            { icon: Video, title: "Secure Video Tasks", desc: "Tamper-proof player with automatic watch tracking. Complete videos to unlock daily earnings.", from: "from-cyan-600", to: "to-cyan-900" },
+            { icon: ShieldCheck, title: "Verified Submissions", desc: "Upload screenshot proof reviewed by admins. Transparent, fair, and fast approval process.", from: "from-violet-600", to: "to-violet-900" },
+            { icon: Wallet, title: "Fast PKR Withdrawals", desc: "Instant withdrawals to OPay or Mashreq Bank — processed within a few hours.", from: "from-emerald-600", to: "to-emerald-900" },
           ].map((f) => (
-            <div key={f.title} className={`glass rounded-2xl p-5 bg-gradient-to-br ${f.accent} border border-white/10 hover:border-white/20 transition-all hover:scale-[1.02]`}>
-              <div className="h-10 w-10 rounded-xl bg-white/15 grid place-items-center mb-3">
-                <f.icon className="h-5 w-5 text-white" />
+            <div key={f.title} className={`relative overflow-hidden rounded-2xl p-5 bg-gradient-to-br ${f.from} ${f.to} text-white shadow-lg hover:scale-[1.02] transition-all`}>
+              <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
+              <div className="relative">
+                <div className="h-10 w-10 rounded-xl bg-white/15 grid place-items-center mb-3">
+                  <f.icon className="h-5 w-5 text-white" />
+                </div>
+                <h3 className="font-bold">{f.title}</h3>
+                <p className="mt-1.5 text-sm opacity-75 leading-relaxed">{f.desc}</p>
               </div>
-              <h3 className="font-bold text-white">{f.title}</h3>
-              <p className="mt-1.5 text-sm text-white/70 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </section>
@@ -242,8 +262,8 @@ function Index() {
           <h2 className="text-xl font-bold mb-2">Supported Payment Methods</h2>
           <p className="opacity-70 text-sm mb-6">Pay to join · Withdraw your earnings</p>
           <div className="flex flex-wrap justify-center gap-3">
-            {["JazzCash", "Easypaisa", "OPay", "Mashreq Bank", "Bank Transfer"].map((m) => (
-              <div key={m} className="glass rounded-xl px-4 py-2.5 text-sm font-medium border border-white/15 hover:border-white/30 transition">
+            {["OPay", "Mashreq Bank", "Bank Transfer"].map((m) => (
+              <div key={m} className="rounded-xl bg-white/10 border border-white/20 px-5 py-2.5 text-sm font-semibold hover:bg-white/20 transition">
                 {m}
               </div>
             ))}
