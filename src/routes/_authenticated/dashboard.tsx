@@ -226,11 +226,7 @@ function QuickWithdrawCard({ availableBalance }: { availableBalance: number }) {
   }
 
   return (
-    <div className="relative rounded-2xl overflow-hidden">
-      {/* Animated gradient border */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse opacity-60" />
-      <div className="relative rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-px">
-        <div className="rounded-2xl bg-gradient-to-br from-emerald-950/90 to-teal-950/90 dark:from-emerald-950 dark:to-teal-950 backdrop-blur p-5 flex items-center gap-4">
+    <div className="rounded-2xl bg-gradient-to-br from-emerald-800 to-teal-900 p-5 flex items-center gap-4 border border-emerald-600/40 shadow-lg">
           {/* Icon */}
           <div className="relative shrink-0">
             <div className="h-14 w-14 rounded-2xl bg-emerald-400/20 grid place-items-center">
@@ -334,8 +330,6 @@ function QuickWithdrawCard({ availableBalance }: { availableBalance: number }) {
               Full wallet <ChevronRight className="h-2.5 w-2.5" />
             </Link>
           </div>
-        </div>
-      </div>
     </div>
   );
 }

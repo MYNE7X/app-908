@@ -5,10 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BrandLogo } from "@/components/brand-logo";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ShieldCheck, Banknote, Smartphone } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -61,28 +58,84 @@ function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-gradient-hero">
-      {/* Brand */}
-      <Link to="/" className="mb-7 flex flex-col items-center gap-3">
-        <BrandLogo size="lg" variant="onPrimary" showWordmark showTagline />
-      </Link>
+    <div className="min-h-screen flex flex-col bg-[#00291C]">
 
-      <Card className="glass shadow-elegant w-full max-w-sm border-white/20">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-xl">Welcome</CardTitle>
-          <CardDescription>Sign in or create a new account.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")}>
-            <TabsList className="grid grid-cols-2 w-full mb-4">
-              <TabsTrigger value="signin">Sign in</TabsTrigger>
-              <TabsTrigger value="signup">Sign up</TabsTrigger>
-            </TabsList>
+      {/* Top header bar */}
+      <div className="bg-[#003D2A] border-b border-[#005238] px-5 py-4 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-emerald-400 grid place-items-center shadow">
+            <span className="text-[#00291C] font-black text-base leading-none">ES</span>
+          </div>
+          <div>
+            <div className="text-white font-bold text-base leading-tight">Expert Solutions</div>
+            <div className="text-emerald-400/70 text-[10px] leading-tight">Earning Platform</div>
+          </div>
+        </Link>
+        <div className="flex items-center gap-1.5 text-emerald-400/60 text-xs">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          <span>Secure Login</span>
+        </div>
+      </div>
 
-            <TabsContent value="signin">
+      {/* Main content */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
+
+        {/* Trust badges */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex items-center gap-1.5 text-emerald-400/60 text-xs">
+            <Banknote className="h-3.5 w-3.5" />
+            <span>OPay &amp; Mashreq</span>
+          </div>
+          <span className="text-white/20">|</span>
+          <div className="flex items-center gap-1.5 text-emerald-400/60 text-xs">
+            <Smartphone className="h-3.5 w-3.5" />
+            <span>Instant Payouts</span>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+          {/* Card header */}
+          <div className="bg-[#004B32] px-6 py-5">
+            <h1 className="text-white text-xl font-bold">
+              {tab === "signin" ? "Sign in to your account" : "Create your account"}
+            </h1>
+            <p className="text-emerald-300/70 text-sm mt-0.5">
+              {tab === "signin" ? "Enter your credentials to continue" : "Join thousands earning daily"}
+            </p>
+          </div>
+
+          {/* Tab switcher */}
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => setTab("signin")}
+              className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                tab === "signin"
+                  ? "text-[#004B32] border-b-2 border-[#004B32] -mb-px"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              onClick={() => setTab("signup")}
+              className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+                tab === "signup"
+                  ? "text-[#004B32] border-b-2 border-[#004B32] -mb-px"
+                  : "text-gray-400 hover:text-gray-600"
+              }`}
+            >
+              Register
+            </button>
+          </div>
+
+          {/* Form */}
+          <div className="px-6 py-6">
+            {tab === "signin" ? (
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-email">Email</Label>
+                  <Label htmlFor="si-email" className="text-gray-700 text-sm font-medium">Email Address</Label>
                   <Input
                     id="si-email"
                     type="email"
@@ -91,10 +144,11 @@ function AuthPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
+                    className="border-gray-300 focus:border-[#004B32] focus:ring-[#004B32] h-11 text-gray-900"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="si-pw">Password</Label>
+                  <Label htmlFor="si-pw" className="text-gray-700 text-sm font-medium">Password</Label>
                   <div className="relative">
                     <Input
                       id="si-pw"
@@ -104,38 +158,41 @@ function AuthPage() {
                       minLength={6}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pr-10"
+                      className="pr-10 border-gray-300 focus:border-[#004B32] focus:ring-[#004B32] h-11 text-gray-900"
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       onClick={() => setShowPw((p) => !p)}
                     >
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-primary font-semibold" disabled={loading}>
-                  {loading ? "Signing in…" : "Sign in"}
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-[#004B32] hover:bg-[#003D28] text-white font-semibold rounded-xl mt-2"
+                  disabled={loading}
+                >
+                  {loading ? "Signing in…" : "Sign In"}
                 </Button>
               </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
+            ) : (
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-1.5">
-                  <Label htmlFor="su-name">Full name</Label>
+                  <Label htmlFor="su-name" className="text-gray-700 text-sm font-medium">Full Name</Label>
                   <Input
                     id="su-name"
                     autoComplete="name"
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Your name"
+                    placeholder="Your full name"
+                    className="border-gray-300 focus:border-[#004B32] focus:ring-[#004B32] h-11 text-gray-900"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="su-email">Email</Label>
+                  <Label htmlFor="su-email" className="text-gray-700 text-sm font-medium">Email Address</Label>
                   <Input
                     id="su-email"
                     type="email"
@@ -144,10 +201,11 @@ function AuthPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
+                    className="border-gray-300 focus:border-[#004B32] focus:ring-[#004B32] h-11 text-gray-900"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="su-pw">Password</Label>
+                  <Label htmlFor="su-pw" className="text-gray-700 text-sm font-medium">Password</Label>
                   <div className="relative">
                     <Input
                       id="su-pw"
@@ -157,29 +215,48 @@ function AuthPage() {
                       minLength={6}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pr-10"
+                      className="pr-10 border-gray-300 focus:border-[#004B32] focus:ring-[#004B32] h-11 text-gray-900"
                     />
                     <button
                       type="button"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       onClick={() => setShowPw((p) => !p)}
                     >
                       {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-primary font-semibold" disabled={loading}>
-                  {loading ? "Creating account…" : "Create account"}
+                <Button
+                  type="submit"
+                  className="w-full h-11 bg-[#004B32] hover:bg-[#003D28] text-white font-semibold rounded-xl mt-2"
+                  disabled={loading}
+                >
+                  {loading ? "Creating account…" : "Create Account"}
                 </Button>
               </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            )}
+          </div>
 
-      <p className="mt-5 text-xs text-white/50 text-center max-w-xs">
-        By continuing you agree to our Terms of Service and Privacy Policy.
-      </p>
+          {/* Card footer */}
+          <div className="bg-gray-50 border-t border-gray-100 px-6 py-4 flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-[#004B32] shrink-0" />
+            <p className="text-xs text-gray-500">
+              Your data is protected with 256-bit encryption
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-6 text-xs text-white/30 text-center max-w-xs">
+          By continuing you agree to our Terms of Service and Privacy Policy.
+        </p>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="bg-[#001F14] border-t border-[#003020] py-3 px-5 flex justify-center">
+        <p className="text-[10px] text-white/20 text-center">
+          © 2026 Expert Solutions · Secure Earning Platform
+        </p>
+      </div>
     </div>
   );
 }
