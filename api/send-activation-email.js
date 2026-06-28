@@ -1,3 +1,6 @@
+const SENDER_EMAIL = process.env.SENDER_EMAIL || "expertsolutiononline@gmail.com";
+const SENDER_NAME = process.env.SENDER_NAME || "Expert Solutions";
+
 async function brevoRequest(path, method = "GET", body = null) {
   const apiKey = process.env.BREVO_API_KEY;
   const opts = {
@@ -10,17 +13,8 @@ async function brevoRequest(path, method = "GET", body = null) {
   return { ok: res.ok, status: res.status, data };
 }
 
-async function getVerifiedSender() {
-  const { ok, data } = await brevoRequest("/senders");
-  if (ok && Array.isArray(data?.senders) && data.senders.length > 0) {
-    const verified = data.senders.find((s) => s.active !== false) || data.senders[0];
-    return { name: verified.name || "Expert Solutions", email: verified.email };
-  }
-  const { ok: ok2, data: data2 } = await brevoRequest("/account");
-  if (ok2 && data2?.email) {
-    return { name: data2.companyName || data2.firstName || "Expert Solutions", email: data2.email };
-  }
-  return null;
+function getSender() {
+  return { name: SENDER_NAME, email: SENDER_EMAIL };
 }
 
 function buildEmailHtml(toName, packageName, activationKey) {
@@ -151,20 +145,14 @@ export default async function handler(req, res) {
 
   const { toEmail, toName, activationKey, packageName } = req.body;
   if (!process.env.BREVO_API_KEY) {
-    return res.status(500).json({ error: "Email service not configured" });
+    return res.status(500).json({ error: "Email service not configured — BREVO_API_KEY missing" });
   }
   if (!toEmail || !activationKey) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
-    const sender = await getVerifiedSender();
-    if (!sender) {
-      return res.status(422).json({
-        error: "NO_VERIFIED_SENDER",
-        fixUrl: "https://app.brevo.com/senders",
-      });
-    }
+    const sender = getSender();
 
     console.log(`[email] ${sender.email} → ${toEmail} | key: ${activationKey}`);
 
@@ -187,6 +175,7 @@ export default async function handler(req, res) {
         return res.status(403).json({
           error: "IP_NOT_AUTHORIZED",
           authorizeUrl: "https://app.brevo.com/security/authorised_ips",
+          ip: "35.244.7.179",
         });
       }
       return res.status(500).json({ error: msg || "Brevo rejected the request" });

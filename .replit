@@ -46,3 +46,5 @@ publicDir = "dist"
 [userenv.shared]
 SUPABASE_URL = "https://mirhamzbvpcvgkfvuvun.supabase.co"
 NODE_ENV = "development"
+SENDER_EMAIL = "expertsolutiononline@gmail.com"
+SENDER_NAME = "Expert Solutions"

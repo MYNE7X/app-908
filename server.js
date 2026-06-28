@@ -9,6 +9,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = process.env.NODE_ENV !== "production";
 const PORT = process.env.PORT || 5000;
 
+const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "https://mirhamzbvpcvgkfvuvun.supabase.co";
+const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1pcmhhbXpidnBjdmdrZnZ1dnVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTg3MDUsImV4cCI6MjA5NTc3NDcwNX0.kzLb1BsSd-0xCpaGh8HbfFdmF6uIA0aDL6yU64dy3X4";
+const SENDER_EMAIL = process.env.SENDER_EMAIL || "expertsolutiononline@gmail.com";
+const SENDER_NAME = process.env.SENDER_NAME || "Expert Solutions";
+
 async function brevoRequest(path, method = "GET", body = null) {
   const apiKey = process.env.BREVO_API_KEY;
   const opts = {
@@ -21,17 +26,8 @@ async function brevoRequest(path, method = "GET", body = null) {
   return { ok: res.ok, status: res.status, data };
 }
 
-async function getVerifiedSender() {
-  const { ok, data } = await brevoRequest("/senders");
-  if (ok && Array.isArray(data?.senders) && data.senders.length > 0) {
-    const verified = data.senders.find((s) => s.active !== false) || data.senders[0];
-    return { name: verified.name || "Expert Solutions", email: verified.email };
-  }
-  const { ok: ok2, data: data2 } = await brevoRequest("/account");
-  if (ok2 && data2?.email) {
-    return { name: data2.companyName || data2.firstName || "Expert Solutions", email: data2.email };
-  }
-  return null;
+function getSender() {
+  return { name: SENDER_NAME, email: SENDER_EMAIL };
 }
 
 function buildEmailHtml(toName, packageName, activationKey) {
@@ -183,36 +179,20 @@ async function start() {
   app.use(express.json({ limit: "10mb" }));
 
   app.get("/api/config", (_req, res) => {
-    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const key = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-    if (!url || !key) return res.status(500).json({ error: "Supabase credentials not configured" });
-    res.json({ supabaseUrl: url, supabaseAnonKey: key });
+    res.json({ supabaseUrl: SUPABASE_URL, supabaseAnonKey: SUPABASE_KEY });
   });
 
-  app.get("/api/brevo-senders", async (_req, res) => {
-    if (!process.env.BREVO_API_KEY) return res.status(500).json({ error: "BREVO_API_KEY not set" });
-    try {
-      const sender = await getVerifiedSender();
-      if (!sender) return res.status(404).json({ error: "NO_VERIFIED_SENDER" });
-      res.json({ sender });
-    } catch (err) {
-      res.status(500).json({ error: String(err) });
-    }
+  app.get("/api/brevo-senders", (_req, res) => {
+    res.json({ sender: getSender() });
   });
 
   app.post("/api/send-activation-email", async (req, res) => {
     const { toEmail, toName, activationKey, packageName } = req.body;
-    if (!process.env.BREVO_API_KEY) return res.status(500).json({ error: "Email service not configured" });
+    if (!process.env.BREVO_API_KEY) return res.status(500).json({ error: "Email service not configured — BREVO_API_KEY missing" });
     if (!toEmail || !activationKey) return res.status(400).json({ error: "Missing required fields" });
 
     try {
-      const sender = await getVerifiedSender();
-      if (!sender) {
-        return res.status(422).json({
-          error: "NO_VERIFIED_SENDER",
-          fixUrl: "https://app.brevo.com/senders",
-        });
-      }
+      const sender = getSender();
 
       console.log(`[email] ${sender.email} → ${toEmail} | key: ${activationKey}`);
 
