@@ -86,18 +86,29 @@ function RootComponent() {
         <Outlet />
       </OfflineGate>
       <Toaster
-        position="bottom-right"
+        position="top-center"
         richColors
         toastOptions={{
           classNames: {
-            toast: "rounded-2xl shadow-2xl border font-medium text-sm",
-            title: "font-semibold",
-            description: "text-xs opacity-80",
+            toast:
+              "rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.18)] border border-white/20 backdrop-blur-md font-medium text-sm px-4 py-3 gap-3 min-w-[280px] max-w-[420px]",
+            title: "font-bold text-[13px] tracking-tight",
+            description: "text-[11px] opacity-75 leading-relaxed",
+            success:
+              "!bg-gradient-to-r !from-emerald-500 !to-teal-500 !text-white !border-emerald-400/40",
+            error:
+              "!bg-gradient-to-r !from-rose-500 !to-pink-600 !text-white !border-rose-400/40",
+            warning:
+              "!bg-gradient-to-r !from-amber-400 !to-orange-500 !text-white !border-amber-400/40",
+            info:
+              "!bg-gradient-to-r !from-violet-500 !to-indigo-600 !text-white !border-violet-400/40",
+            icon: "!text-white",
           },
           duration: 3500,
         }}
         expand={false}
         offset={20}
+        gap={8}
       />
     </QueryClientProvider>
   );
