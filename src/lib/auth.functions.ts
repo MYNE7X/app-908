@@ -3,10 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type AppRole = "user" | "admin" | "super_admin";
 
 export async function getCurrentUserContext() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("Not authenticated");
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return null;
 
   const [profileRes, rolesRes, walletRes] = await Promise.all([
     supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
