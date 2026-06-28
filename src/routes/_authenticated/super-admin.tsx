@@ -614,7 +614,7 @@ function SupportPanel() {
       if (error) throw error;
       return data ?? [];
     },
-    refetchInterval: 4000,
+    refetchInterval: false,
     retry: 1,
   });
 
@@ -666,13 +666,24 @@ function SupportPanel() {
   async function toggleChatStatus() {
     if (!selectedChatId || !selectedChat) return;
     const newStatus = selectedChat.status === "open" ? "closed" : "open";
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from("support_messages").insert({
+      chat_id: selectedChatId,
+      sender_id: user.id,
+      is_admin: true,
+      body: newStatus === "closed" ? "__sys:ended_by_admin__" : "__sys:reopened__",
+    });
     await supabase.from("support_chats").update({
       status: newStatus,
       closed_at: newStatus === "closed" ? new Date().toISOString() : null,
     }).eq("id", selectedChatId);
-    toast.success(newStatus === "closed" ? "Chat closed" : "Chat reopened");
+
+    toast.success(newStatus === "closed" ? "Chat ended" : "Chat reopened");
     qc.invalidateQueries({ queryKey: ["admin-support-chats", filter] });
     qc.invalidateQueries({ queryKey: ["admin-support-chats-unread"] });
+    qc.invalidateQueries({ queryKey: ["admin-support-msgs", selectedChatId] });
   }
 
   function selectChat(id: string) {
@@ -773,7 +784,9 @@ function SupportPanel() {
                           "h-1.5 w-1.5 rounded-full shrink-0",
                           chat.status === "open" ? "bg-emerald-500" : "bg-muted-foreground/40",
                         )} />
-                        <span className="text-[10px] text-muted-foreground">{chat.status} · {timeAgo(chat.updated_at)}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          {chat.status === "open" ? "open" : "closed"} · {timeAgo(chat.updated_at)}
+                        </span>
                       </div>
                     </div>
                   </button>
@@ -844,40 +857,58 @@ function SupportPanel() {
                       </div>
                     </div>
                   )}
-                  {(messages ?? []).map((msg: any) => (
-                    <div
-                      key={msg.id}
-                      className={cn(
-                        "flex gap-2 max-w-[80%]",
-                        msg.is_admin ? "self-end ml-auto flex-row-reverse" : "self-start",
-                      )}
-                    >
-                      <Avatar className="h-7 w-7 shrink-0 mt-0.5">
-                        <AvatarFallback className={cn(
-                          "text-[10px] font-bold",
-                          msg.is_admin ? "bg-violet-100 text-violet-700" : "bg-muted text-muted-foreground",
-                        )}>
-                          {msg.is_admin ? "ES" : (selectedChat.profiles?.full_name ?? "U")[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className={cn(
-                        "px-3 py-2 rounded-2xl text-sm leading-relaxed",
-                        msg.is_admin
-                          ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-tr-sm"
-                          : "bg-muted rounded-tl-sm",
-                      )}>
-                        <p className="break-words">{msg.body}</p>
-                        <div className={cn("flex items-center gap-1 mt-1", msg.is_admin ? "justify-end" : "justify-start")}>
-                          <span className={cn("text-[10px]", msg.is_admin ? "text-white/60" : "text-muted-foreground")}>
-                            {timeAgo(msg.created_at)}
+                  {(messages ?? []).map((msg: any) => {
+                    const SYS: Record<string, { icon: string; text: string; cls: string }> = {
+                      "__sys:ended_by_user__":  { icon: "👤", text: "Chat ended by user",    cls: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800" },
+                      "__sys:ended_by_admin__": { icon: "🛡️", text: "Chat ended by admin",   cls: "bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800" },
+                      "__sys:reopened__":       { icon: "🔄", text: "Chat reopened by admin", cls: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" },
+                    };
+                    const sys = SYS[msg.body];
+                    if (sys) {
+                      return (
+                        <div key={msg.id} className="flex justify-center my-1">
+                          <span className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold", sys.cls)}>
+                            <span>{sys.icon}</span> {sys.text}
+                            <span className="opacity-50 font-normal">· {timeAgo(msg.created_at)}</span>
                           </span>
-                          {msg.is_admin && msg.read_at && (
-                            <CheckCheck className="h-3 w-3 text-white/60" />
-                          )}
+                        </div>
+                      );
+                    }
+                    return (
+                      <div
+                        key={msg.id}
+                        className={cn(
+                          "flex gap-2 max-w-[80%]",
+                          msg.is_admin ? "self-end ml-auto flex-row-reverse" : "self-start",
+                        )}
+                      >
+                        <Avatar className="h-7 w-7 shrink-0 mt-0.5">
+                          <AvatarFallback className={cn(
+                            "text-[10px] font-bold",
+                            msg.is_admin ? "bg-violet-100 text-violet-700" : "bg-muted text-muted-foreground",
+                          )}>
+                            {msg.is_admin ? "ES" : (selectedChat.profiles?.full_name ?? "U")[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className={cn(
+                          "px-3 py-2 rounded-2xl text-sm leading-relaxed",
+                          msg.is_admin
+                            ? "bg-gradient-to-br from-violet-600 to-indigo-600 text-white rounded-tr-sm"
+                            : "bg-muted rounded-tl-sm",
+                        )}>
+                          <p className="break-words">{msg.body}</p>
+                          <div className={cn("flex items-center gap-1 mt-1", msg.is_admin ? "justify-end" : "justify-start")}>
+                            <span className={cn("text-[10px]", msg.is_admin ? "text-white/60" : "text-muted-foreground")}>
+                              {timeAgo(msg.created_at)}
+                            </span>
+                            {msg.is_admin && msg.read_at && (
+                              <CheckCheck className="h-3 w-3 text-white/60" />
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <div ref={bottomRef} />
                 </div>
 

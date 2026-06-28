@@ -67,7 +67,7 @@ export function HelpCenter({ userId }: { userId?: string }) {
         .order("created_at", { ascending: true });
       return data ?? [];
     },
-    refetchInterval: open ? 3000 : false,
+    refetchInterval: false,
   });
 
   const unreadCount = messages?.filter((m: any) => m.is_admin && !m.read_at).length ?? 0;
@@ -149,13 +149,20 @@ export function HelpCenter({ userId }: { userId?: string }) {
   }
 
   async function closeMyChat() {
-    if (!activeChatId) return;
+    if (!activeChatId || !userId) return;
+    await supabase.from("support_messages").insert({
+      chat_id: activeChatId,
+      sender_id: userId,
+      is_admin: false,
+      body: "__sys:ended_by_user__",
+    });
     await supabase.from("support_chats")
       .update({ status: "closed", closed_at: new Date().toISOString() })
       .eq("id", activeChatId);
+    qc.invalidateQueries({ queryKey: ["support-messages", activeChatId] });
+    qc.invalidateQueries({ queryKey: ["my-support-chats", userId] });
     setActiveChatId(null);
     setView("picker");
-    qc.invalidateQueries({ queryKey: ["my-support-chats", userId] });
   }
 
   const closedChats = (openChats ?? []).filter((c: any) => c.status === "closed");
@@ -370,7 +377,25 @@ export function HelpCenter({ userId }: { userId?: string }) {
   );
 }
 
+const SYS_LABELS: Record<string, { icon: string; text: string; color: string }> = {
+  "__sys:ended_by_user__":  { icon: "👤", text: "Chat ended by you",    color: "bg-rose-50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-800" },
+  "__sys:ended_by_admin__": { icon: "🛡️", text: "Chat ended by support", color: "bg-violet-50 dark:bg-violet-950/30 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-800" },
+  "__sys:reopened__":       { icon: "🔄", text: "Chat reopened by support", color: "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800" },
+};
+
 function MessageBubble({ msg }: { msg: any }) {
+  const sys = SYS_LABELS[msg.body];
+  if (sys) {
+    return (
+      <div className="flex justify-center my-1">
+        <span className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-semibold", sys.color)}>
+          <span>{sys.icon}</span> {sys.text}
+          <span className="opacity-50 font-normal">· {timeAgo(msg.created_at)}</span>
+        </span>
+      </div>
+    );
+  }
+
   const isAdmin = msg.is_admin;
   return (
     <div className={cn("flex gap-2 max-w-[85%]", isAdmin ? "self-start" : "self-end ml-auto flex-row-reverse")}>
