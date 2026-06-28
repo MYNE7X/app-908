@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { PushNotifications } from "@/components/push-notifications";
 import { BrandLogo } from "@/components/brand-logo";
 import { AppLoader } from "@/components/app-loader";
+import { HelpCenter } from "@/components/help-center";
 
 const BOTTOM_NAV = [
   { to: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -148,6 +149,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {isBanned ? <BannedScreen status={banStatus} onSignOut={signOut} /> : children}
           </div>
         </main>
+        <HelpCenter userId={ctx?.userId} />
       </div>
 
       {/* ── Mobile bottom nav ──────────────────────────── */}
