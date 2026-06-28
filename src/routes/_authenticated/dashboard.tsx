@@ -228,7 +228,7 @@ function QuickWithdrawCard({ availableBalance }: { availableBalance: number }) {
   return (
     <div className="relative rounded-2xl overflow-hidden">
       {/* Animated gradient border */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-[spin_4s_linear_infinite] opacity-60 blur-sm" />
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 animate-pulse opacity-60" />
       <div className="relative rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 p-px">
         <div className="rounded-2xl bg-gradient-to-br from-emerald-950/90 to-teal-950/90 dark:from-emerald-950 dark:to-teal-950 backdrop-blur p-5 flex items-center gap-4">
           {/* Icon */}
