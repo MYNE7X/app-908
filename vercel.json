@@ -1,5 +1,11 @@
 {
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/config", "destination": "/api/config" },
+    { "source": "/api/brevo-senders", "destination": "/api/brevo-senders" },
+    { "source": "/api/send-activation-email", "destination": "/api/send-activation-email" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
