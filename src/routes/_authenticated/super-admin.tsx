@@ -575,7 +575,7 @@ function SupportPanel() {
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  const { data: chats } = useQuery({
+  const { data: chats, error: chatsError } = useQuery({
     queryKey: ["admin-support-chats", filter],
     queryFn: async () => {
       let q = supabase
@@ -583,24 +583,28 @@ function SupportPanel() {
         .select("*, profiles(full_name, avatar_url)")
         .order("updated_at", { ascending: false });
       if (filter !== "all") q = q.eq("status", filter);
-      const { data } = await q;
+      const { data, error } = await q;
+      if (error) throw error;
       return data ?? [];
     },
     refetchInterval: 8000,
+    retry: 1,
   });
 
   const { data: messages } = useQuery({
     queryKey: ["admin-support-msgs", selectedChatId],
     enabled: !!selectedChatId,
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("support_messages")
         .select("*")
         .eq("chat_id", selectedChatId!)
         .order("created_at", { ascending: true });
+      if (error) throw error;
       return data ?? [];
     },
     refetchInterval: 4000,
+    retry: 1,
   });
 
   const selectedChat = chats?.find((c: any) => c.id === selectedChatId);
@@ -682,16 +686,26 @@ function SupportPanel() {
         </div>
       </div>
 
-      <div className="border rounded-2xl overflow-hidden bg-card" style={{ minHeight: 480 }}>
-        <div className="flex h-full" style={{ minHeight: 480 }}>
+      {chatsError && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 space-y-2">
+          <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">⚠️ Support tables not set up yet</p>
+          <p className="text-xs text-muted-foreground">
+            Run <code className="bg-muted px-1 py-0.5 rounded font-mono">support_chat_migration.sql</code> in your Supabase SQL Editor to enable the chat system.
+          </p>
+          <p className="text-xs text-muted-foreground font-mono break-all opacity-70">{String((chatsError as any)?.message ?? chatsError)}</p>
+        </div>
+      )}
+
+      <div className="border rounded-2xl overflow-hidden bg-card" style={{ height: 560 }}>
+        <div className="flex" style={{ height: 560 }}>
 
           {/* ── LEFT: Chat list ───────────────────────────── */}
           <div className={cn(
-            "w-full lg:w-72 shrink-0 border-r flex flex-col",
+            "w-full lg:w-72 shrink-0 border-r flex flex-col overflow-hidden",
             mobileView === "detail" ? "hidden lg:flex" : "flex",
           )}>
             {/* Filter tabs */}
-            <div className="flex border-b text-xs font-medium">
+            <div className="flex border-b text-xs font-medium shrink-0">
               {(["open", "closed", "all"] as const).map((f) => (
                 <button
                   key={f}
@@ -707,7 +721,7 @@ function SupportPanel() {
             </div>
 
             {/* Chat items */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0">
               {(!chats || chats.length === 0) && (
                 <div className="p-6 text-center text-sm text-muted-foreground">
                   <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-30" />
@@ -759,7 +773,7 @@ function SupportPanel() {
 
           {/* ── RIGHT: Chat detail ───────────────────────── */}
           <div className={cn(
-            "flex-1 flex flex-col min-w-0",
+            "flex-1 flex flex-col min-w-0 overflow-hidden",
             mobileView === "list" ? "hidden lg:flex" : "flex",
           )}>
             {!selectedChat ? (
@@ -810,7 +824,7 @@ function SupportPanel() {
                 </div>
 
                 {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 flex flex-col">
+                <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 flex flex-col">
                   {(!messages || messages.length === 0) && (
                     <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">
                       <div className="text-center">

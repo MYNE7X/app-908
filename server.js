@@ -183,8 +183,8 @@ async function start() {
   app.use(express.json({ limit: "10mb" }));
 
   app.get("/api/config", (_req, res) => {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_ANON_KEY;
+    const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const key = process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!url || !key) return res.status(500).json({ error: "Supabase credentials not configured" });
     res.json({ supabaseUrl: url, supabaseAnonKey: key });
   });
