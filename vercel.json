@@ -1,5 +1,5 @@
 {
-  "installCommand": "bun install",
+  "installCommand": "rm -f package-lock.json && bun install",
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
   "framework": "vite",
