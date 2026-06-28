@@ -34,7 +34,7 @@ export function FineAlertSection() {
   if (isLoading) return null;
 
   const unpaid = (fines ?? []).filter(
-    (f: any) => f.status !== "paid" && f.status !== "cancelled"
+    (f: any) => f.status !== "paid" && f.status !== "approved" && f.status !== "cancelled"
   );
 
   if (!unpaid.length) return null;
