@@ -89,6 +89,30 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const activeStrikeCount = (strikes ?? []).filter((s: any) => s.is_active !== false).length;
 
+  const { data: pkgType } = useQuery({
+    queryKey: ["my-package-type"],
+    enabled: authReady,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      try {
+        const { data } = await supabase.rpc("get_my_package_type" as any);
+        return (data as string) ?? "both";
+      } catch { return "both"; }
+    },
+  });
+
+  const taskType = pkgType ?? "both";
+  const filteredBottomNav = BOTTOM_NAV.filter((item) => {
+    if (item.to === "/tasks" && taskType === "video") return false;
+    if (item.to === "/video-tasks" && taskType === "task") return false;
+    return true;
+  });
+  const filteredSideNav = SIDE_NAV.filter((item) => {
+    if (item.to === "/tasks" && taskType === "video") return false;
+    if (item.to === "/video-tasks" && taskType === "task") return false;
+    return true;
+  });
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => setMoreOpen(false), [pathname]);
 
@@ -137,7 +161,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* ── Desktop layout ──────────────────────────────── */}
       <div className="flex flex-1 min-h-0">
         <aside className="hidden lg:flex sticky top-0 h-screen w-64 shrink-0 border-r bg-sidebar text-sidebar-foreground flex-col">
-          <DesktopSidebar ctx={ctx} onSignOut={signOut} pathname={pathname} strikeCount={activeStrikeCount} onOpenHelp={() => setHelpOpen(true)} />
+          <DesktopSidebar ctx={ctx} onSignOut={signOut} pathname={pathname} strikeCount={activeStrikeCount} onOpenHelp={() => setHelpOpen(true)} sideNav={filteredSideNav} />
         </aside>
 
         <main className="flex-1 min-w-0 pb-24 lg:pb-0">
@@ -152,7 +176,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 safe-area-bottom">
         <div className="relative bg-background/95 backdrop-blur-xl border-t border-border/60 shadow-[0_-4px_24px_rgba(0,0,0,0.15)]">
           <div className="flex items-stretch h-16">
-            {BOTTOM_NAV.map((item) => {
+            {filteredBottomNav.map((item) => {
               const active = pathname.startsWith(item.to);
               const Icon = item.icon;
               return (
@@ -344,12 +368,14 @@ function DesktopSidebar({
   pathname,
   strikeCount,
   onOpenHelp,
+  sideNav,
 }: {
   ctx: Awaited<ReturnType<typeof getCurrentUserContext>> | undefined;
   onSignOut: () => void;
   pathname: string;
   strikeCount: number;
   onOpenHelp: () => void;
+  sideNav: typeof SIDE_NAV | typeof SIDE_NAV[number][];
 }) {
   return (
     <div className="flex flex-col w-full h-full">
@@ -358,7 +384,7 @@ function DesktopSidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
-        {SIDE_NAV.map((item) => {
+        {sideNav.map((item) => {
           const active = pathname.startsWith(item.to);
           const Icon = item.icon;
           return (

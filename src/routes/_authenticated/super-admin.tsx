@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { Crown, Send, Key, Mail, Search, Check, Loader2, MessageCircle, X, CheckCheck, Clock, ChevronLeft } from "lucide-react";
+import { Crown, Send, Key, Mail, Search, Check, Loader2, MessageCircle, X, CheckCheck, Clock, ChevronLeft, Plus, Package, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/super-admin")({
   head: () => ({ meta: [{ title: "Super Admin — Expert Solutions" }] }),
@@ -68,12 +68,16 @@ function SuperAdminPage() {
             <MessageCircle className="h-3.5 w-3.5 mr-1.5" /> Support
             <SupportUnreadBadge />
           </TabsTrigger>
+          <TabsTrigger value="packages">
+            <Package className="h-3.5 w-3.5 mr-1.5" /> Packages
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="keys"><ActivationKeysPanel /></TabsContent>
         <TabsContent value="bulk"><BulkAssign /></TabsContent>
         <TabsContent value="users"><UserList /></TabsContent>
         <TabsContent value="fake"><FakeReviews /></TabsContent>
         <TabsContent value="support"><SupportPanel /></TabsContent>
+        <TabsContent value="packages"><PackagesPanel /></TabsContent>
       </Tabs>
     </div>
   );
@@ -990,5 +994,230 @@ function FakeReviews() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/* ── Packages Panel ──────────────────────────────────── */
+function PackagesPanel() {
+  const qc = useQueryClient();
+  const [editing, setEditing] = useState<any | null>(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const { data: packages } = useQuery({
+    queryKey: ["packages-manage"],
+    queryFn: async () => {
+      const { data } = await supabase.from("packages").select("*").order("sort_order");
+      return data ?? [];
+    },
+  });
+
+  async function savePackage(pkg: any) {
+    const payload = {
+      name: pkg.name,
+      tagline: pkg.tagline || null,
+      description: pkg.description || null,
+      price: Number(pkg.price),
+      daily_earning: Number(pkg.daily_earning) || 0,
+      features: pkg.features,
+      is_active: pkg.is_active ?? true,
+      is_featured: pkg.is_featured ?? false,
+      sort_order: Number(pkg.sort_order) || 1,
+      task_type: pkg.task_type || "both",
+    };
+    let error;
+    if (pkg.id) {
+      ({ error } = await (supabase.from("packages") as any).update(payload).eq("id", pkg.id));
+    } else {
+      ({ error } = await (supabase.from("packages") as any).insert(payload));
+    }
+    if (error) return toast.error(error.message);
+    toast.success(pkg.id ? "Package updated ✓" : "Package created ✓");
+    setEditing(null); setShowForm(false);
+    qc.invalidateQueries({ queryKey: ["packages-manage"] });
+    qc.invalidateQueries({ queryKey: ["packages"] });
+    qc.invalidateQueries({ queryKey: ["packages-admin"] });
+  }
+
+  async function toggleActive(id: string, current: boolean) {
+    await supabase.from("packages").update({ is_active: !current }).eq("id", id);
+    qc.invalidateQueries({ queryKey: ["packages-manage"] });
+    qc.invalidateQueries({ queryKey: ["packages"] });
+    toast.success(!current ? "Package activated" : "Package deactivated");
+  }
+
+  return (
+    <div className="space-y-4 mt-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground">{packages?.length ?? 0} packages</p>
+        <Button onClick={() => { setEditing({}); setShowForm(true); }} className="gap-2">
+          <Plus className="h-4 w-4" /> New Package
+        </Button>
+      </div>
+
+      {showForm && (
+        <PackageForm
+          pkg={editing ?? {}}
+          onSave={savePackage}
+          onCancel={() => { setEditing(null); setShowForm(false); }}
+        />
+      )}
+
+      <div className="space-y-3">
+        {(packages ?? []).map((p: any) => (
+          <Card key={p.id} className="glass">
+            <CardContent className="py-4 flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <span className="font-bold truncate">{p.name}</span>
+                  {p.is_featured && <Badge className="text-[10px] h-4 px-1.5">Popular</Badge>}
+                  {!p.is_active && <Badge variant="secondary" className="text-[10px] h-4 px-1.5">Inactive</Badge>}
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium capitalize">
+                    {p.task_type ?? "both"}
+                  </span>
+                </div>
+                {p.tagline && <div className="text-xs text-muted-foreground">{p.tagline}</div>}
+                <div className="text-sm font-semibold mt-1">
+                  ₨{Number(p.price).toLocaleString()} · ₨{Number(p.daily_earning ?? 0).toLocaleString()}/day
+                </div>
+                {p.description && (
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{p.description}</p>
+                )}
+              </div>
+              <div className="flex gap-2 shrink-0 flex-col sm:flex-row">
+                <Button size="sm" variant="outline" className="gap-1.5"
+                  onClick={() => { setEditing(p); setShowForm(true); }}>
+                  <Pencil className="h-3 w-3" /> Edit
+                </Button>
+                <Button size="sm" variant="ghost" className="text-xs gap-1"
+                  onClick={() => toggleActive(p.id, p.is_active)}>
+                  {p.is_active
+                    ? <><ToggleRight className="h-3.5 w-3.5 text-emerald-500" /> Active</>
+                    : <><ToggleLeft className="h-3.5 w-3.5 text-muted-foreground" /> Inactive</>}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        {!packages?.length && (
+          <div className="text-center py-12 text-muted-foreground text-sm">
+            No packages yet. Create your first one above.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PackageForm({ pkg, onSave, onCancel }: { pkg: any; onSave: (p: any) => void; onCancel: () => void }) {
+  const [name, setName] = useState(pkg.name ?? "");
+  const [tagline, setTagline] = useState(pkg.tagline ?? "");
+  const [description, setDescription] = useState(pkg.description ?? "");
+  const [price, setPrice] = useState(String(pkg.price ?? ""));
+  const [dailyEarning, setDailyEarning] = useState(String(pkg.daily_earning ?? ""));
+  const [features, setFeatures] = useState<string>(
+    Array.isArray(pkg.features) ? (pkg.features as string[]).join("\n") : String(pkg.features ?? "")
+  );
+  const [taskType, setTaskType] = useState(pkg.task_type ?? "both");
+  const [isActive, setIsActive] = useState(pkg.is_active ?? true);
+  const [isFeatured, setIsFeatured] = useState(pkg.is_featured ?? false);
+  const [sortOrder, setSortOrder] = useState(String(pkg.sort_order ?? "1"));
+
+  function save() {
+    if (!name.trim()) return toast.error("Package name is required");
+    if (!price || isNaN(Number(price))) return toast.error("Valid price is required");
+    onSave({
+      ...pkg,
+      name: name.trim(), tagline: tagline.trim(), description: description.trim(),
+      price: parseFloat(price),
+      daily_earning: parseFloat(dailyEarning) || 0,
+      features: features.split("\n").map((s) => s.trim()).filter(Boolean),
+      task_type: taskType,
+      is_active: isActive,
+      is_featured: isFeatured,
+      sort_order: parseInt(sortOrder) || 1,
+    });
+  }
+
+  return (
+    <Card className="glass border-primary/30 shadow-lg">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Package className="h-4 w-4 text-primary" />
+          {pkg.id ? "Edit Package" : "New Package"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-xs font-semibold">Package Name *</Label>
+            <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Starter" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Tagline</Label>
+            <Input className="mt-1" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Video Watching" />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-xs font-semibold">Description</Label>
+          <Textarea className="mt-1 text-sm" value={description} onChange={(e) => setDescription(e.target.value)} rows={2} placeholder="What does this package include?" />
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <Label className="text-xs font-semibold">Price (PKR) *</Label>
+            <Input className="mt-1" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="799" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Daily Earning (PKR)</Label>
+            <Input className="mt-1" type="number" value={dailyEarning} onChange={(e) => setDailyEarning(e.target.value)} placeholder="80" />
+          </div>
+          <div>
+            <Label className="text-xs font-semibold">Sort Order</Label>
+            <Input className="mt-1" type="number" value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} placeholder="1" />
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-xs font-semibold">Task Access Type</Label>
+          <p className="text-[11px] text-muted-foreground mb-1">Controls which task tabs this package holder can see.</p>
+          <select value={taskType} onChange={(e) => setTaskType(e.target.value)}
+            className="w-full mt-1 rounded-lg border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+            <option value="both">Both — Tasks &amp; Video Tasks</option>
+            <option value="task">Tasks Only</option>
+            <option value="video">Video Tasks Only</option>
+          </select>
+        </div>
+
+        <div>
+          <Label className="text-xs font-semibold">Features (one per line)</Label>
+          <Textarea
+            className="mt-1 text-sm font-mono"
+            value={features}
+            onChange={(e) => setFeatures(e.target.value)}
+            rows={5}
+            placeholder={"Watch 5–10 videos per day\nDaily earning ₨80\nWeekly ₨560 · Monthly ₨2,400\nWithdraw via OPay or Mashreq\n24/7 support"}
+          />
+        </div>
+
+        <div className="flex gap-5">
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Checkbox checked={isActive} onCheckedChange={(v) => setIsActive(!!v)} />
+            <span>Active (visible to users)</span>
+          </label>
+          <label className="flex items-center gap-2 text-sm cursor-pointer">
+            <Checkbox checked={isFeatured} onCheckedChange={(v) => setIsFeatured(!!v)} />
+            <span>Featured (Most Popular badge)</span>
+          </label>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <Button onClick={save} className="gap-2">
+            <Check className="h-4 w-4" /> {pkg.id ? "Save Changes" : "Create Package"}
+          </Button>
+          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

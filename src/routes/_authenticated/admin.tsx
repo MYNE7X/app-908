@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Video, Clock, ImageIcon } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Expert Solutions" }] }),
@@ -52,6 +53,7 @@ function AdminPage() {
             <TabsTrigger value="purchases">Purchases</TabsTrigger>
             <TabsTrigger value="joins">Plan joins</TabsTrigger>
             <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="videos" className="gap-1.5"><Video className="h-3.5 w-3.5" />Videos</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="queue"><TaskQueue /></TabsContent>
@@ -61,6 +63,7 @@ function AdminPage() {
         <TabsContent value="purchases"><PurchasesQueue /></TabsContent>
         <TabsContent value="joins"><PlanJoinsQueue /></TabsContent>
         <TabsContent value="users"><UsersList /></TabsContent>
+        <TabsContent value="videos"><VideoQueue /></TabsContent>
       </Tabs>
     </div>
   );
@@ -150,9 +153,10 @@ function TaskQueue() {
                 {t.proof_files.map((f: string) => <a key={f} href={f} target="_blank" rel="noreferrer"><img src={f} className="h-20 w-20 rounded border object-cover" /></a>)}
               </div>
             )}
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button size="sm" onClick={() => review(t.id, true)}>Approve</Button>
               <RejectDialog onConfirm={(reason) => review(t.id, false, reason)} />
+              <RevokeDialog taskId={t.id} onRevoked={() => qc.invalidateQueries()} />
             </div>
           </CardContent>
         </Card>
@@ -427,4 +431,150 @@ function PlanJoinsQueue() {
       ))}
     </div>
   );
+}
+
+/* ── Revoke Dialog ───────────────────────────── */
+function RevokeDialog({ taskId, onRevoked }: { taskId: string; onRevoked: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  async function revoke() {
+    setBusy(true);
+    const { data, error } = await supabase.rpc("revoke_task" as any, { _task_id: taskId });
+    setBusy(false);
+    if (error || !(data as any)?.success) return toast.error((data as any)?.error ?? error?.message ?? "Failed");
+    toast.success("Task revoked");
+    setOpen(false);
+    onRevoked();
+  }
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="text-destructive border-destructive/30">Revoke</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Revoke Task</DialogTitle></DialogHeader>
+        <p className="text-sm text-muted-foreground">This will revoke the task and remove it from the user's active tasks. This cannot be undone.</p>
+        <div className="flex gap-2 pt-2">
+          <Button variant="destructive" disabled={busy} onClick={revoke}>
+            {busy ? "Revoking…" : "Yes, Revoke"}
+          </Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ── Video Queue ─────────────────────────────── */
+function VideoQueue() {
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["video-task-queue"],
+    queryFn: async () => {
+      const { data: tasks } = await supabase
+        .from("tasks")
+        .select("*")
+        .eq("task_type", "video")
+        .not("status", "eq", "cancelled")
+        .order("submitted_at", { ascending: false, nullsFirst: false })
+        .limit(100);
+      if (!tasks?.length) return [];
+      const ids: string[] = [...new Set(tasks.map((t) => t.assigned_to).filter((id): id is string => id !== null && id !== undefined))];
+      const { data: profs } = await supabase.from("profiles").select("id, full_name, username").in("id", ids);
+      const profMap = new Map((profs ?? []).map((p) => [p.id, p]));
+      return tasks.map((t) => ({ ...t, profile: t.assigned_to ? profMap.get(t.assigned_to) : undefined }));
+    },
+  });
+
+  async function review(id: string, approve: boolean, reason?: string) {
+    const { data, error } = await supabase.rpc("review_task", { _task_id: id, _approve: approve, _reason: reason ?? undefined });
+    if (error || !(data as any)?.success) toast.error((data as any)?.error ?? error?.message ?? "Failed");
+    else { toast.success(approve ? "Approved ✓" : "Rejected"); qc.invalidateQueries(); }
+  }
+
+  if (isLoading) return <p className="text-muted-foreground mt-4">Loading…</p>;
+  if (!data?.length) return <p className="text-muted-foreground mt-4">No video tasks yet.</p>;
+
+  return (
+    <div className="space-y-3 mt-4">
+      {data.map((t: any) => {
+        const proofImages: string[] = Array.isArray(t.proof_files) ? t.proof_files : [];
+        const watchSecs = Number(t.total_watch_seconds ?? 0);
+        return (
+          <Card key={t.id} className="glass">
+            <CardHeader>
+              <div className="flex items-start justify-between gap-3 flex-wrap">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold text-base">{t.title}</span>
+                    <VideoStatusBadge status={t.status} />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t.profile?.full_name ?? t.profile?.username ?? "Unknown user"}
+                  </p>
+                </div>
+                <span className="text-sm font-semibold">{pkr(Number(t.reward))}</span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {/* Meta row */}
+              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                {t.submitted_at && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> Submitted {new Date(t.submitted_at).toLocaleString()}
+                  </span>
+                )}
+                {watchSecs > 0 && (
+                  <span className="flex items-center gap-1">
+                    <Video className="h-3 w-3" /> Watched {Math.floor(watchSecs / 60)}m {watchSecs % 60}s
+                  </span>
+                )}
+              </div>
+              {/* Proof text */}
+              {t.submission_text && (
+                <p className="text-sm bg-muted/40 rounded-xl p-3 leading-relaxed">{t.submission_text}</p>
+              )}
+              {/* Proof images */}
+              {proofImages.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-2">
+                    <ImageIcon className="h-3 w-3" /> {proofImages.length} screenshot{proofImages.length > 1 ? "s" : ""}
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    {proofImages.map((f) => (
+                      <a key={f} href={f} target="_blank" rel="noreferrer">
+                        <img src={f} className="h-28 w-28 rounded-xl border object-cover shadow-sm hover:scale-105 transition-transform" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Actions */}
+              {t.status === "submitted" && (
+                <div className="flex gap-2 flex-wrap pt-1">
+                  <Button size="sm" onClick={() => review(t.id, true)}>Approve</Button>
+                  <RejectDialog onConfirm={(r) => review(t.id, false, r)} />
+                  <RevokeDialog taskId={t.id} onRevoked={() => qc.invalidateQueries()} />
+                </div>
+              )}
+              {t.status === "rejected" && t.rejection_reason && (
+                <p className="text-xs text-destructive">Reason: {t.rejection_reason}</p>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function VideoStatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    assigned: "bg-blue-500/10 text-blue-600",
+    submitted: "bg-amber-500/10 text-amber-600",
+    approved: "bg-emerald-500/10 text-emerald-600",
+    rejected: "bg-red-500/10 text-red-600",
+    revoked: "bg-muted text-muted-foreground",
+  };
+  return <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${map[status] ?? "bg-muted"}`}>{status}</span>;
 }

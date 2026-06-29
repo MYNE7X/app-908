@@ -142,7 +142,7 @@ function VideoTaskBody({ task, videos }: { task: any; videos: string[] }) {
   const allWatched = videos.length > 0 && videos.every((v) => watched.has(v));
 
   async function markWatched(url: string) {
-    await supabase.rpc("mark_video_watched", { _task_id: task.id, _video_url: url });
+    await supabase.rpc("mark_video_watched" as any, { _task_id: task.id, _video_url: url });
     qc.invalidateQueries({ queryKey: ["video-progress", task.id] });
   }
 
@@ -199,21 +199,30 @@ function SubmitDialog({ task }: { task: any }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="w-full">Submit proof</Button>
+        <Button size="sm" className="w-full">Submit Proof ✓</Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Submit proof — {task.title}</DialogTitle></DialogHeader>
-        <div className="space-y-3">
-          <div>
-            <Label>Note (optional)</Label>
-            <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} />
+        <DialogHeader><DialogTitle>Submit Proof — {task.title}</DialogTitle></DialogHeader>
+        <div className="space-y-4">
+          {/* Instruction banner */}
+          <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-3 text-sm">
+            <div className="font-semibold text-amber-700 dark:text-amber-400 mb-1">📸 Screenshot Required</div>
+            <p className="text-amber-700/80 dark:text-amber-300/80 text-xs leading-relaxed">
+              Take a screenshot of the YouTube video showing it is playing or completed. The screenshot must clearly show the video title and your watch progress. Submissions without a valid screenshot will be rejected.
+            </p>
           </div>
           <div>
-            <Label>Screenshot</Label>
+            <Label className="text-xs font-semibold">Screenshot of YouTube Video *</Label>
+            <p className="text-[11px] text-muted-foreground mb-1.5">Must show the video playing or completed on YouTube.</p>
             <FileUpload bucket="proof-uploads" pathPrefix={`${task.assigned_to}/${task.id}`} value={proof} onChange={setProof} />
           </div>
-          <Button onClick={submit} disabled={saving} className="w-full">
-            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />} Submit
+          <div>
+            <Label className="text-xs font-semibold">Note (optional)</Label>
+            <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} placeholder="Any additional info…" />
+          </div>
+          <Button onClick={submit} disabled={saving || !proof} className="w-full">
+            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {!proof ? "Upload screenshot to continue" : "Submit Proof"}
           </Button>
         </div>
       </DialogContent>
