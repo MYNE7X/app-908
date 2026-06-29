@@ -158,9 +158,8 @@ function VideoTaskBody({ task, videos }: { task: any; videos: string[] }) {
             Video {i + 1}
           </div>
           <SecureVideoPlayer
-            url={url}
-            taskId={task.id}
-            onWatched={() => markWatched(url)}
+            src={url}
+            onComplete={() => markWatched(url)}
           />
         </div>
       ))}
