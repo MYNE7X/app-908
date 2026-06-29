@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,19 +12,66 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/feature/file-upload";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Key, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/tasks")({
   head: () => ({ meta: [{ title: "Tasks — Expert Solutions" }] }),
   component: TasksPage,
 });
 
+function useIsClient() {
+  return useQuery({
+    queryKey: ["my-roles"],
+    queryFn: async () => {
+      const { data: u } = await supabase.auth.getUser();
+      if (!u.user) return false;
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", u.user.id);
+      return (data ?? []).some((r: any) => r.role === "client");
+    },
+  });
+}
+
+function NoKeyScreen() {
+  return (
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+      <div className="h-20 w-20 rounded-3xl bg-primary/10 grid place-items-center mb-5 shadow-inner">
+        <Key className="h-10 w-10 text-primary" />
+      </div>
+      <h2 className="text-xl font-bold tracking-tight mb-2">You need a Key to access tasks</h2>
+      <p className="text-sm text-muted-foreground max-w-xs mb-6">
+        Purchase a plan and redeem your activation key to unlock task assignments and start earning.
+      </p>
+      <Button asChild>
+        <Link to="/packages">
+          Buy a Plan <ArrowRight className="h-4 w-4 ml-2" />
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
 function TasksPage() {
+  const { data: isClient, isLoading: rolesLoading } = useIsClient();
+
+  if (rolesLoading) return <Loading />;
+  if (!isClient) return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tasks</h1>
+        <p className="text-muted-foreground mt-1">Complete tasks and submit proof to earn.</p>
+      </div>
+      <NoKeyScreen />
+    </div>
+  );
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Tasks</h1>
-        <p className="text-muted-foreground mt-1">Claim open tasks and submit proof to earn.</p>
+        <p className="text-muted-foreground mt-1">Complete your assigned tasks and submit proof to earn.</p>
       </div>
       <Tabs defaultValue="mine">
         <TabsList>
@@ -49,7 +96,7 @@ function MyTasks() {
     },
   });
   if (isLoading) return <Loading />;
-  if (!data?.length) return <Empty msg="No tasks assigned yet." />;
+  if (!data?.length) return <Empty msg="No tasks assigned to you yet. Check back soon." />;
   return (
     <div className="grid gap-3 mt-4">
       {data.map((t) => <TaskCard key={t.id} task={t} />)}
@@ -140,7 +187,6 @@ function SubmitDialog({ task }: { task: any }) {
 
   async function submit() {
     setSaving(true);
-    const { data: u } = await supabase.auth.getUser();
     const { data, error } = await supabase.rpc("submit_task_v2", {
       _task_id: task.id, _text: text, _url: url,
       _proof_files: proof ? [proof] : [],

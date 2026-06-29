@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { getCurrentUserContext } from "@/lib/auth.functions";
 import { toast } from "sonner";
-import { PushNotifications } from "@/components/push-notifications";
 import { BrandLogo } from "@/components/brand-logo";
 import { AppLoader } from "@/components/app-loader";
 import { HelpCenter } from "@/components/help-center";
@@ -119,7 +118,6 @@ export function AppShell({ children }: { children: ReactNode }) {
           <BrandLogo size="sm" showWordmark />
         </Link>
         <div className="flex items-center gap-2">
-          <PushNotifications userId={ctx?.userId} />
           {activeStrikeCount > 0 && (
             <div className="flex items-center gap-1 rounded-full bg-destructive/10 border border-destructive/20 px-2 py-0.5 text-destructive text-xs font-bold">
               <ShieldAlert className="h-3 w-3" /> {activeStrikeCount}
@@ -144,10 +142,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <main className="flex-1 min-w-0 pb-24 lg:pb-0">
           <div className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto">
-            <div className="hidden lg:flex mb-4 justify-end">
-              <PushNotifications userId={ctx?.userId} />
-            </div>
-            {isBanned ? <BannedScreen status={banStatus} onSignOut={signOut} /> : children}
+              {isBanned ? <BannedScreen status={banStatus} onSignOut={signOut} /> : children}
           </div>
         </main>
         <HelpCenter userId={ctx?.userId} open={helpOpen} onOpenChange={setHelpOpen} />

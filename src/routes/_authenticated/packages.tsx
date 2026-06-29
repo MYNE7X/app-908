@@ -14,17 +14,14 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  Check, Sparkles, Copy, Upload, Key, TrendingUp,
-  Calendar, CalendarDays, ArrowRight, Zap, Handshake,
+  Check, Sparkles, Upload, Key, TrendingUp,
+  Calendar, CalendarDays, ArrowRight, Zap,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/packages")({
   head: () => ({ meta: [{ title: "Packages — Expert Solutions" }] }),
   component: PackagesPage,
 });
-
-const OPAY = "03371441111";
-const MASHREQ = "089120147898";
 
 function pkr(val: number) {
   return `₨${val.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
@@ -81,9 +78,6 @@ function PackagesPage() {
         </p>
       </div>
 
-      {/* Payment partners — unique design */}
-      <PaymentPartnersSection />
-
       {/* Redeem key */}
       <RedeemKeyCard />
 
@@ -126,109 +120,6 @@ function PackagesPage() {
 function StatusBadge({ status }: { status: string }) {
   const v = status === "approved" ? "default" : status === "rejected" ? "destructive" : "secondary";
   return <Badge variant={v as any} className="capitalize shrink-0">{status}</Badge>;
-}
-
-/* ── Payment Partners — unique handshake design ───── */
-function PaymentPartnersSection() {
-  function copy(t: string) {
-    navigator.clipboard.writeText(t);
-    toast.success("Account number copied!", { description: "Paste it in your payment app." });
-  }
-
-  const partners = [
-    {
-      id: "opay",
-      name: "OPay",
-      account: OPAY,
-      color: "from-green-500 to-emerald-600",
-      bg: "bg-green-50 dark:bg-green-950/30",
-      border: "border-green-200 dark:border-green-800/50",
-      badge: "bg-green-500/15 text-green-700 dark:text-green-400",
-      icon: "💚",
-      tagline: "Instant transfer",
-    },
-    {
-      id: "mashreq",
-      name: "Mashreq Bank",
-      account: MASHREQ,
-      color: "from-red-500 to-rose-600",
-      bg: "bg-red-50 dark:bg-red-950/30",
-      border: "border-red-200 dark:border-red-800/50",
-      badge: "bg-red-500/15 text-red-700 dark:text-red-400",
-      icon: "🏦",
-      tagline: "Bank transfer",
-    },
-  ];
-
-  return (
-    <div className="rounded-2xl border bg-card overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b bg-muted/40">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-full bg-primary/10 grid place-items-center">
-            <Handshake className="h-4 w-4 text-primary" />
-          </div>
-          <div>
-            <div className="text-sm font-bold">Official Payment Partners</div>
-            <div className="text-[11px] text-muted-foreground">We are in collaboration with these trusted platforms</div>
-          </div>
-        </div>
-        {/* Animated handshake dots */}
-        <div className="ml-auto flex items-center gap-1">
-          {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="h-1.5 w-1.5 rounded-full bg-primary animate-bounce"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div className="p-4 grid sm:grid-cols-2 gap-3">
-        {partners.map((p) => (
-          <div key={p.id} className={`relative rounded-xl border ${p.border} ${p.bg} overflow-hidden group`}>
-            {/* Gradient stripe at top */}
-            <div className={`h-1 w-full bg-gradient-to-r ${p.color}`} />
-            <div className="p-3">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl leading-none">{p.icon}</span>
-                <div className="min-w-0 flex-1">
-                  <div className="font-bold text-sm">{p.name}</div>
-                  <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full inline-block ${p.badge}`}>{p.tagline}</div>
-                </div>
-                {/* Animated pulse = live/active */}
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
-                </span>
-              </div>
-              <div className="flex items-center justify-between gap-2 mt-2 rounded-lg bg-background/70 border px-2.5 py-2">
-                <span className="font-mono text-sm font-bold tracking-wide">{p.account}</span>
-                <button
-                  onClick={() => copy(p.account)}
-                  className="shrink-0 rounded-md p-1.5 hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                  title="Copy"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Collab footer */}
-      <div className="px-4 pb-3 flex items-center gap-2">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
-          <span className="animate-[spin_3s_linear_infinite] inline-block">🤝</span>
-          Trusted partnership — Pay securely
-        </span>
-        <div className="flex-1 h-px bg-border" />
-      </div>
-    </div>
-  );
 }
 
 /* ── Redeem key ───────────────────────────────── */
