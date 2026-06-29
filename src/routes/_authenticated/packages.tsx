@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  Check, Sparkles, Upload, Key, TrendingUp,
+  Check, Sparkles, Copy, Upload, Key, TrendingUp,
   Calendar, CalendarDays, ArrowRight, Zap,
 } from "lucide-react";
 
@@ -22,6 +22,9 @@ export const Route = createFileRoute("/_authenticated/packages")({
   head: () => ({ meta: [{ title: "Packages — Expert Solutions" }] }),
   component: PackagesPage,
 });
+
+const OPAY = "03371441111";
+const MASHREQ = "089120147898";
 
 function pkr(val: number) {
   return `₨${val.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
